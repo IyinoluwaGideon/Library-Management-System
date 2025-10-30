@@ -17,20 +17,26 @@ Route::get('/user', function (Request $request) {
 
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
-Route::patch('users/{user}', [AuthController::class, 'update']);
+Route::patch('users/{userId}', [AuthController::class, 'update']);
 Route::delete('users/{user}', [AuthController::class, 'delete']);
 Route::get('/users', [AuthController::class, 'getAllUsers']);
-Route::get('/users/{user}', [AuthController::class, 'getUserById']);
-Route::post('/books', [BookController::class, 'store']);
-Route::get('/books', [BookController::class, 'index']);
-Route::get('/books/{book}', [BookController::class, 'show']);
-Route::patch('/books/{book}', [BookController::class, 'update']);
+Route::get('/users/{userId}', [AuthController::class, 'getUserById']);
+Route::middleware(['auth:sanctum', 'admin' ])->group(function () {
+    Route::post('/books', [BookController::class, 'addbook']);
+    Route::patch('/inventory/{book}', [InventoryController::class, 'updateInventory']);
+});
+Route::middleware(['auth:sanctum'])->group(function () {
+    Route::post('/borrow', [BorrowController::class, 'borrowBook']);
+    Route::post('/borrows/{borrowId}/return', [BorrowController::class, 'returnBook']);
+    Route::get('/borrows', [BorrowController::class, 'getAllBorrows']);
+    Route::get('/borrows/{borrow}', [BorrowController::class, 'getBorrowById']);
+});
+Route::get('/books', [BookController::class, 'getAllBooks']);
+Route::get('/books/{book}', [BookController::class, 'getBook']);
+Route::patch('/books/{book}', [BookController::class, 'updateBook']);
 Route::delete('/books/{book}', [BookController::class, 'delete']);
-Route::post('/borrow', [BorrowController::class, 'borrowBook']);
-Route::post('/borrows/{borrow}/return', [BorrowController::class, 'returnBook']);
-Route::get('/borrows', [BorrowController::class, 'getAllBorrows']);
-Route::get('/borrows/{borrow}', [BorrowController::class, 'getBorrowById']);
 Route::patch('/inventory/{book}', [InventoryController::class, 'updateInventory']);
+Route::get('/logout', [AuthController::class, 'logout'])->middleware('auth:sanctum');
 
 
 

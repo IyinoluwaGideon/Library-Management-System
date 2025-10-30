@@ -21,6 +21,7 @@ class AuthController extends Controller
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
+            'role' => 'user',
         ]);
 
         return response()->json([
@@ -41,8 +42,18 @@ class AuthController extends Controller
         if (!$user || !Hash::check($request->password, $user->password)) {
             return response(['message' => 'Invalid credentials'], 401);
         }
+        $token = $user->createToken('api')->plainTextToken;
 
-        return response()->json(['message' => 'Login successful'], 200);
+        return response()->json(['token' => $token, 'user' => $user], 200);
+    }
+
+    public function logout(Request $request)
+    {
+        $request->user()->currentAccessToken()->delete();
+
+        return response([
+            'message' => 'Logged out successfully',
+        ], 200);
     }
 
     public function update(Request $request, User $user)
@@ -70,10 +81,22 @@ class AuthController extends Controller
         ], 200);
     }
 
-    public function delete(User $user)
+    public function userNotFound($id)
     {
-        $user->delete();
+        $user = User::find($id);
+        if (!$user) {
+            return response(['Message' => 'User not found'], 404);
+        }
+        return $user;
+    }
 
+    public function delete($id)
+    {
+        $user = $this->userNotFound($id);
+        if ($user instanceof Response) {
+            return $user;
+        }
+        $user->delete();
         return response([
             'message' => 'User deleted successfully',
         ], 200);
@@ -88,13 +111,11 @@ class AuthController extends Controller
         ], 200);
     }
 
-    public function getUserById(int $id)
+    public function getUserById($user)
     {
-        $user = User::find($id);
-        if (!$user) {
-            return response([
-                'message' => 'User not found',
-            ], 404);
+        $user = $this->userNotFound($user);
+        if ($user) {
+            return $user;
         }
         return response([
             'message' => 'User retrieved successfully',

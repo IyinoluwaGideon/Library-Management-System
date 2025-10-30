@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Middleware\EnsureAdmin;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -14,8 +15,11 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware): void {
         // Register route middleware
-        $middleware->append(EnsureUserIsLoggedIn::class);
+        $middleware->alias(['user' => EnsureUserIsLoggedIn::class]);
+        $middleware->alias(['admin' => EnsureAdmin::class]);
     })
+
+
     ->withExceptions(function (Exceptions $exceptions): void {
         //
     })->create();

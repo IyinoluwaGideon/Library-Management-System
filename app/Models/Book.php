@@ -31,13 +31,15 @@ class Book extends Model
         return $this->hasOne(Inventory::class);
     }
 
-    protected static function booted()
-    {
-        static::created(function (Book $book) {
-            $book->inventory()->create([
-                'total_copies' => $book->copies,
-                'available_copies' => $book->copies,
-            ]);
-        });
-    }
+    protected $hidden = ['created_at', 'updated_at'];
+
+    // protected static function booted()
+    // {
+    //     static::created(function (Book $book) {
+    //         $book->inventory()->create([
+    //             'total_copies' => $book->copies,
+    //             'available_copies' => $book->copies,
+    //         ]);
+    //     });
+    // }
 }

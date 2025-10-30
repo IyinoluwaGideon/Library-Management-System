@@ -26,4 +26,6 @@ class Inventory extends Model
     {
         return  $this->available_copies > 0;
     }
+
+    protected $hidden = ['created_at', 'updated_at'];
 }

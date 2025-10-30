@@ -14,7 +14,7 @@ use Illuminate\Support\Str;
 class User extends Authenticatable
 {
     use HasUuids;
-    
+
     /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasApiTokens, HasFactory, Notifiable;
 
@@ -27,6 +27,7 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'role',
     ];
 
     /**
@@ -37,6 +38,8 @@ class User extends Authenticatable
     protected $hidden = [
         'password',
         'remember_token',
+        'created_at',
+        'updated_at',
     ];
 
     /**
@@ -56,4 +59,7 @@ class User extends Authenticatable
     {
         return $this->hasMany(Borrow::class);
     }
+
+
+   
 }

@@ -22,6 +22,7 @@ class BorrowController extends Controller
             ->where('book_id', $validated['book_id'])
             ->whereNull('returned_at')
             ->first();
+            
 
         if ($alreadyBorrowed) {
             return response([
@@ -30,6 +31,8 @@ class BorrowController extends Controller
         }
 
         $book = Book::with('inventory')->findOrFail($validated['book_id']);
+        return $book;
+        exit;
         if (!$book->inventory || $book->inventory->available_copies < 1) {
             return response([
                 'message' => 'This book is currently unavailable (no copies left).',
@@ -65,11 +68,11 @@ class BorrowController extends Controller
         $returned_date = Carbon::now();
 
         $dueDate = Carbon::parse($borrow->due_at);
-        $daysLate = $returned_date->greaterThan($dueDate)
+        $daysAfterDueDate = $returned_date->greaterThan($dueDate)
             ? $dueDate->diffInDays($returned_date)
             : 0;
-        $perDayRate = 100;
-        $fine = $daysLate * $perDayRate;
+        $ratePerDay = 100;
+        $fine = $daysAfterDueDate * $ratePerDay;
 
         $borrow->returned_at = $returned_date;
         $borrow->fine = $fine;
@@ -83,8 +86,8 @@ class BorrowController extends Controller
         return response([
             'message' => 'Book returned successfully',
             'borrow' => $borrow,
-            'meta' => [
-                'days_late' => $daysLate,
+            'data' => [
+                'days_late' => $daysAfterDueDate,
                 'fine' => $fine,
             ],
         ], 200);
@@ -94,8 +97,7 @@ class BorrowController extends Controller
     {
         $borrows = Borrow::all();
         return response([
-            'message' => 'Borrows retrieved successfully',
-            'borrows' => $borrows,
+            'data' => $borrows,
         ], 200);
     }
 
@@ -107,6 +109,8 @@ class BorrowController extends Controller
                 'message' => 'Borrow record not found'
             ], 404);
         }
+
+        $this->authorize('view', $borrow);
         return response([
             'message' => 'Borrow record retrieved successfully',
             'borrow' => $borrow
